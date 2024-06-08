@@ -4,7 +4,7 @@ const { MessageEmbed } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('zipcode')
+    .setName('postalcode')
     .setDescription('郵便番号で住所を検索します。')
     .addStringOption(option =>
       option.setName('郵便番号')
