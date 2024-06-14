@@ -31,6 +31,7 @@ module.exports = {
 
     // クライアントが参加している全てのサーバーリストを取得
     const guilds = interaction.client.guilds.cache;
+    embed.setDescription(`Total Servers: ${guilds.size}`);
 
     for (const guild of guilds.values()) {
       let inviteLink = '招待リンクがありません';
@@ -49,11 +50,16 @@ module.exports = {
         }
       }
 
-      if (inviteLink === '招待リンクがありません') {
-        embed.addField(guild.name, `ID: ${guild.id}\nMembers: ${guild.memberCount}`);
-      } else {
-        embed.addField(guild.name, `Members: ${guild.memberCount}\nInvite: [招待リンク](${inviteLink})`);
+      const owner = await guild.fetchOwner();
+      let ownerTag = owner.user.tag;
+      if (ownerTag.endsWith('#0000') || ownerTag.endsWith('#0')) {
+        ownerTag = ownerTag.split('#')[0];
       }
+
+      embed.addField(
+        guild.name,
+        `ID: ${guild.id}\nMembers: ${guild.memberCount}\nOwner: ${ownerTag}\nInvite: ${inviteLink === '招待リンクがありません' ? inviteLink : `[招待リンク](${inviteLink})`}`
+      );
     }
 
     try {
