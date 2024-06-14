@@ -12,7 +12,14 @@ module.exports = {
     // ADMIN_USER_IDに登録されていないユーザーからの実行は拒否する
     const adminUserId = process.env.ADMIN_USER_ID;
     if (interaction.user.id !== adminUserId) {
-      return interaction.reply({ content: 'このコマンドを実行する権限がありません。', ephemeral: true });
+      try {
+        await interaction.reply({ content: 'このコマンドを実行する権限がありません。', ephemeral: true });
+      } catch (error) {
+        if (error.message !== 'INTERACTION_ALREADY_REPLIED') {
+          console.error('Failed to reply:', error);
+        }
+      }
+      return;
     }
 
     // コマンドの実行を一時的に遅延する
@@ -26,13 +33,35 @@ module.exports = {
     const guilds = interaction.client.guilds.cache;
 
     for (const guild of guilds.values()) {
-      const invites = await guild.invites.fetch();
-      const invite = invites.first();
-      embed.addField(guild.name, `Members: ${guild.memberCount}\nInvite: [招待リンク](https://discord.gg/${invite ? invite.code : '招待リンクがありません'})`);
+      let inviteLink = '招待リンクがありません';
+
+      try {
+        const invites = await guild.invites.fetch();
+        const invite = invites.first();
+        if (invite) {
+          inviteLink = `https://discord.gg/${invite.code}`;
+        }
+      } catch (error) {
+        if (error.code === 50013) { // Missing Permissions
+          console.log(`Missing permissions to fetch invites for guild: ${guild.name} (${guild.id})`);
+        } else {
+          console.error(`Failed to fetch invites for guild: ${guild.name} (${guild.id})`, error);
+        }
+      }
+
+      if (inviteLink === '招待リンクがありません') {
+        embed.addField(guild.name, `ID: ${guild.id}\nMembers: ${guild.memberCount}`);
+      } else {
+        embed.addField(guild.name, `Members: ${guild.memberCount}\nInvite: [招待リンク](${inviteLink})`);
+      }
     }
 
-    // サーバーリストをEmbedで送信
-    interaction.editReply({ embeds: [embed] });
+    try {
+      await interaction.editReply({ embeds: [embed] });
+    } catch (error) {
+      if (error.message !== 'INTERACTION_ALREADY_REPLIED') {
+        console.error('Failed to edit reply:', error);
+      }
+    }
   },
 };
-
