@@ -1,6 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { exec } = require('child_process');
 const iconv = require('iconv-lite');
+const { promisify } = require('util');
+const execPromise = promisify(exec);
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -24,19 +26,29 @@ module.exports = {
     const command = interaction.options.getString('command');
 
     try {
-      // 即座に返信
       await interaction.reply({ content: 'コマンド実行中...', ephemeral: true });
 
-      // コマンドの実行
-      const { stdout, stderr } = await exec(command, { encoding: 'buffer' });
+      const child = exec(command, { encoding: 'buffer' });
 
-      if (stderr) {
-        console.error(stderr);
-        await interaction.editReply({ content: 'コマンドの実行中にエラーが発生しました。', ephemeral: true });
-      } else {
-        const result = process.platform === 'win32' ? iconv.decode(stdout, 'Shift_JIS') : stdout;
-        await interaction.editReply({ content: `\`\`\`\n${result}\n\`\`\``, ephemeral: true });
-      }
+      let output = '';
+
+      child.stdout.on('data', (data) => {
+        const result = process.platform === 'win32' ? iconv.decode(data, 'Shift_JIS') : data.toString();
+        output += result;
+
+        interaction.editReply({ content: `\`\`\`\n${output}\n\`\`\``, ephemeral: true }).catch(console.error);
+      });
+
+      child.stderr.on('data', (data) => {
+        const result = process.platform === 'win32' ? iconv.decode(data, 'Shift_JIS') : data.toString();
+        output += result;
+
+        interaction.editReply({ content: `\`\`\`\n${output}\n\`\`\``, ephemeral: true }).catch(console.error);
+      });
+
+      child.on('close', (code) => {
+        interaction.editReply({ content: `コマンドが終了しました。終了コード: ${code}\n\`\`\`\n${output}\n\`\`\``, ephemeral: true }).catch(console.error);
+      });
     } catch (error) {
       console.error(error);
       await interaction.editReply({ content: 'コマンドの実行中にエラーが発生しました。', ephemeral: true });
