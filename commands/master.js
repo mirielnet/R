@@ -10,14 +10,14 @@ module.exports = {
   async execute(interaction) {
     // ボット管理者の実際の情報に置き換えてください
     const masterInfo = {
-      name: 'ありす',
+      name: 'Miriel',
       links: {
-        GitHub: 'https://github.com/16467',
-        Misskey: 'https://miraiskey.net/@164',
-        Discord: '@16467',
-        Mail: 'master@164-67.sbs',
+        GitHub: 'https://github.com/mirielnet',
+        Misskey: 'https://rosekey.jp/@miriel',
+        Discord: '@miriel.net',
+        Mail: 'me@miriel.net',
       },
-      icon: 'https://miraiskey.net/files/d2c26aeb-0f33-4a05-8801-6372e903c9dc',
+      icon: 'https://rosekey.jp/files/7505ae80-9bb5-4d75-a143-caf96a3f17dc',
     };
 
     // 情報を表示するためのEmbedを作成
