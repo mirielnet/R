@@ -2,6 +2,9 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');
 const osUtils = require('os-utils');
 const os = require('os');
+const { exec } = require('child_process');
+const util = require('util');
+const execPromise = util.promisify(exec);
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,9 +19,22 @@ module.exports = {
       const memUsage = await getMemoryUsage();
       const nodeVersion = process.versions.node;
       const osVersion = os.version();
+      const kernelVersion = os.release();
       const cpuInfo = `CPU: ${os.cpus()[0].model}, コア数: ${os.cpus().length}, スレッド数: ${os.cpus()[0].times.length}`;
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const packageVersion = require('../package.json').version;
+
+      let debianVersion = null;
+      let updatesAvailable = null;
+
+      if (os.platform() === 'linux') {
+        const { stdout: lsbRelease } = await execPromise('lsb_release -d');
+        debianVersion = lsbRelease.split(':')[1].trim();
+
+        const { stdout: aptUpdates } = await execPromise('apt list --upgradable');
+        const updateLines = aptUpdates.split('\n').filter(line => line && !line.startsWith('Listing...'));
+        updatesAvailable = updateLines.length > 0 ? `${updateLines.length} パッケージのアップデートがあります。` : 'アップデートはありません。';
+      }
 
       const embed = new MessageEmbed()
         .setColor('#000000')
@@ -26,10 +42,19 @@ module.exports = {
         .addField('BOTのバージョン', packageVersion, true)
         .addField('Node.jsバージョン', nodeVersion)
         .addField('OSバージョン', osVersion)
+        .addField('カーネルバージョン', kernelVersion)
         .addField('CPU情報', cpuInfo)
         .addField('タイムゾーン', timeZone)
         .addField('CPU利用率', createBarGraph(cpuUsage, 'white', 'black'), true)
         .addField('メモリ利用率', createBarGraph(memUsage, 'white', 'black'), true);
+
+      if (debianVersion) {
+        embed.addField('Debianバージョン', debianVersion);
+      }
+
+      if (updatesAvailable) {
+        embed.addField('アップデート情報', updatesAvailable);
+      }
 
       interaction.editReply({ embeds: [embed] });
     } catch (error) {
