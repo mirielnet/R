@@ -11,10 +11,12 @@ module.exports = {
         .setName('type')
         .setDescription('生成するコードの種類 (qr, microqr, rmqr, jan)')
         .setRequired(true)
-        .addChoice('QRコード', 'qr')
-        .addChoice('マイクロQRコード', 'microqr')
-        .addChoice('rMQRコード', 'rmqr')
-        .addChoice('JANコード', 'jan')
+        .addChoices(
+          { name: 'QRコード', value: 'qr' },
+          { name: 'マイクロQRコード', value: 'microqr' },
+          { name: 'rMQRコード', value: 'rmqr' },
+          { name: 'JANコード', value: 'jan' }
+        )
     )
     .addStringOption(option =>
       option
@@ -60,4 +62,3 @@ module.exports = {
     }
   },
 };
-
