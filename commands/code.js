@@ -14,7 +14,6 @@ module.exports = {
         .addChoices(
           { name: 'QRコード', value: 'qr' },
           { name: 'マイクロQRコード', value: 'microqr' },
-          { name: 'rMQRコード', value: 'rmqr' },
           { name: 'JANコード', value: 'jan' }
         )
     )
@@ -37,18 +36,6 @@ module.exports = {
         case 'microqr':
           try {
             codeImage = await qrcode.toBuffer(data, { version: 1, errorCorrectionLevel: 'L' });
-          } catch (err) {
-            if (err.message.includes('version')) {
-              const version = parseInt(err.message.split('Minimum version required to store current data is: ')[1], 10);
-              codeImage = await qrcode.toBuffer(data, { version, errorCorrectionLevel: 'L' });
-            } else {
-              throw err;
-            }
-          }
-          break;
-        case 'rmqr':
-          try {
-            codeImage = await qrcode.toBuffer(data, { version: 2, errorCorrectionLevel: 'L' });
           } catch (err) {
             if (err.message.includes('version')) {
               const version = parseInt(err.message.split('Minimum version required to store current data is: ')[1], 10);
