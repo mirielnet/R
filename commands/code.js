@@ -35,10 +35,28 @@ module.exports = {
           codeImage = await qrcode.toBuffer(data);
           break;
         case 'microqr':
-          codeImage = await qrcode.toBuffer(data, { version: 1, type: 'micro' });
+          try {
+            codeImage = await qrcode.toBuffer(data, { version: 1, errorCorrectionLevel: 'L' });
+          } catch (err) {
+            if (err.message.includes('version')) {
+              const version = parseInt(err.message.split('Minimum version required to store current data is: ')[1], 10);
+              codeImage = await qrcode.toBuffer(data, { version, errorCorrectionLevel: 'L' });
+            } else {
+              throw err;
+            }
+          }
           break;
         case 'rmqr':
-          codeImage = await qrcode.toBuffer(data, { version: 1, type: 'rm' });
+          try {
+            codeImage = await qrcode.toBuffer(data, { version: 2, errorCorrectionLevel: 'L' });
+          } catch (err) {
+            if (err.message.includes('version')) {
+              const version = parseInt(err.message.split('Minimum version required to store current data is: ')[1], 10);
+              codeImage = await qrcode.toBuffer(data, { version, errorCorrectionLevel: 'L' });
+            } else {
+              throw err;
+            }
+          }
           break;
         case 'jan':
           codeImage = await bwipjs.toBuffer({
