@@ -58,7 +58,7 @@ async function getEarthquakeInfo(interaction) {
     const location = earthquake.hypocenter?.name ?? '不明';
 
     // 地図のURLを生成
-    const mapUrl = `https://www.openstreetmap.org/?mlat=${earthquake.hypocenter?.latitude}&mlon=${earthquake.hypocenter?.longitude}#map=10/${earthquake.hypocenter?.latitude}/${earthquake.hypocenter?.longitude}`;
+    const mapUrl = `https://www.openstreetmap.org/?mlat=${earthquake.hypocenter?.latitude}&mlon=${earthquake.hypocenter?.longitude}#map=7/${earthquake.hypocenter?.latitude}/${earthquake.hypocenter?.longitude}`;
 
     // 地図のスクリーンショットを取得し、ファイルに保存
     const screenshotPath = await captureMapScreenshot(mapUrl);
