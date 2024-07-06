@@ -24,18 +24,6 @@ module.exports = {
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const packageVersion = require('../package.json').version;
 
-      let debianVersion = null;
-      let updatesAvailable = null;
-
-      if (os.platform() === 'linux') {
-        const { stdout: lsbRelease } = await execPromise('lsb_release -d');
-        debianVersion = lsbRelease.split(':')[1].trim();
-
-        const { stdout: aptUpdates } = await execPromise('apt list --upgradable');
-        const updateLines = aptUpdates.split('\n').filter(line => line && !line.startsWith('Listing...'));
-        updatesAvailable = updateLines.length > 0 ? `${updateLines.length} パッケージのアップデートがあります。` : 'アップデートはありません。';
-      }
-
       const embed = new MessageEmbed()
         .setColor('#000000')
         .setTitle('システム情報グラフ')
@@ -47,14 +35,6 @@ module.exports = {
         .addField('タイムゾーン', timeZone)
         .addField('CPU利用率', createBarGraph(cpuUsage, 'white', 'black'), true)
         .addField('メモリ利用率', createBarGraph(memUsage, 'white', 'black'), true);
-
-      if (debianVersion) {
-        embed.addField('Debianバージョン', debianVersion);
-      }
-
-      if (updatesAvailable) {
-        embed.addField('アップデート情報', updatesAvailable);
-      }
 
       interaction.editReply({ embeds: [embed] });
     } catch (error) {
