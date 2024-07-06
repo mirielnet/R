@@ -1,7 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');
 const osUtils = require('os-utils');
-const os = require('os');
 const { exec } = require('child_process');
 const util = require('util');
 const execPromise = util.promisify(exec);
@@ -18,7 +17,7 @@ module.exports = {
       const cpuUsage = await getCpuUsage();
       const memUsage = await getMemoryUsage();
       const nodeVersion = process.versions.node;
-      const osVersion = os.version();
+      const osVersion = await getOsVersion();
       const kernelVersion = os.release();
       const cpuInfo = `CPU: ${os.cpus()[0].model}, コア数: ${os.cpus().length}, スレッド数: ${os.cpus()[0].times.length}`;
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -64,6 +63,19 @@ async function getMemoryUsage() {
     const memUsagePercentage = (usedMemory / totalMemory) * 100;
     resolve(memUsagePercentage.toFixed(2));
   });
+}
+
+async function getOsVersion() {
+  try {
+    const { stdout, stderr } = await execPromise('uname -r');
+    if (stderr) {
+      throw new Error(stderr);
+    }
+    return stdout.trim();
+  } catch (error) {
+    console.error('Error getting OS version:', error);
+    throw error;
+  }
 }
 
 function createBarGraph(percentage, textColor, barColor) {
