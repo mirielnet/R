@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');
+const os = require('os');
 const osUtils = require('os-utils');
 const { exec } = require('child_process');
 const util = require('util');
